@@ -3,6 +3,8 @@ require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 
 
 const app = express();
@@ -113,9 +115,9 @@ async function run() {
         //-----------ORDERS  
         app.get("/orders", async (req, res) => {
             const user = req?.query?.user;
-           const query = {user: user};
-           const orders = await orderCollection.find(query).toArray();
-           res.send(orders)
+            const query = { user: user };
+            const orders = await orderCollection.find(query).toArray();
+            res.send(orders)
 
         })
 
@@ -153,6 +155,20 @@ async function run() {
             res.send(result)
         })
 
+
+
+        //----------------PAYMENT
+        app.post('/create-payment-intent', verifyJWT, async (req, res) => {
+            const service = req.body;
+            const price = service.price;
+            const amount = price * 100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: 'usd',
+                payment_method_types: ['card']
+            });
+            res.send({ clientSecret: paymentIntent.client_secret })
+        });
 
 
 
