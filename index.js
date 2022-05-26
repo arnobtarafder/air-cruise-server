@@ -65,6 +65,13 @@ async function run() {
             res.send(products);
         })
 
+        // USERS        
+        app.get("/users", verifyJWT, async (req, res) => {
+            const users = await userCollection.find().toArray();
+            res.send(users)
+        });
+
+
 
         console.log("connected to database");
     }
