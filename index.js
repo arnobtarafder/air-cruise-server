@@ -31,13 +31,17 @@ function verifyJWT(req, res, next) {
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.otcue.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverApi: ServerApiVersion.v1
+});
 
 
 async function run() {
     try {
         await client.connect()
-        const productCollection = client.db("air_cruise").collection("services");
+        const productCollection = client.db("air_cruise").collection("products");
         const orderCollection = client.db("air_cruise").collection("orders");
         const userCollection = client.db("air_cruise").collection("users");
         const reviewCollection = client.db("air_cruise").collection("reviews");
@@ -55,6 +59,11 @@ async function run() {
             }
         }
 
+        // PRODUCTS
+        app.get("/products", async (req, res) => {
+            const products = await productCollection.find({}).toArray();
+            res.send(products);
+        })
 
 
         console.log("connected to database");
@@ -66,14 +75,6 @@ async function run() {
 }
 
 run().catch(console.dir)
-
-client.connect(err => {
-    const collection = client.db("test").collection("devices");
-    // perform actions on the collection object
-    client.close();
-});
-
-
 
 
 
