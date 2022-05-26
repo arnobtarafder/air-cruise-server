@@ -90,6 +90,13 @@ async function run() {
             res.send({ result, token });
         })
 
+        app.delete("/users/admin/:email", verifyJWT, verifyAdmin, async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email }
+            const result = await userCollection.deleteOne(filter);
+            res.send(result);
+        })
+
 
         //---------------ADMIN      
         app.get('/admin/:email', async (req, res) => {
@@ -110,6 +117,7 @@ async function run() {
             res.send(result);
         })
 
+       
 
 
         //-----------ORDERS  
