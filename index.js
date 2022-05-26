@@ -159,8 +159,8 @@ async function run() {
 
         //----------------PAYMENT
         app.post('/create-payment-intent', verifyJWT, async (req, res) => {
-            const service = req.body;
-            const price = service.price;
+            const product = req.body;
+            const price = product.price;
             const amount = price * 100;
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
@@ -169,6 +169,14 @@ async function run() {
             });
             res.send({ clientSecret: paymentIntent.client_secret })
         });
+
+
+        //----------------REVIEWS
+        app.post('/reviews', async (req, res) => {
+            const booking = req.body;
+            const result = await reviewCollection.insertOne(booking);
+            res.send(result);
+        })
 
 
 
