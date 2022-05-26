@@ -35,7 +35,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 async function run() {
-    try{
+    try {
         await client.connect()
         const productCollection = client.db("air_cruise").collection("services");
         const orderCollection = client.db("air_cruise").collection("orders");
@@ -43,15 +43,24 @@ async function run() {
         const reviewCollection = client.db("air_cruise").collection("reviews");
         const paymentCollection = client.db("air_cruise").collection("payments");
 
-      
 
+        const verifyAdmin = async (req, res, next) => {
+            const requester = req.decoded.email;
+            const requesterAccount = await userCollection.findOne({ email: requester });
+            if (requesterAccount.role === "admin") {
+                next();
+            }
+            else {
+                return res.status(403).send({ message: 'Forbidden access' })
+            }
+        }
 
 
 
         console.log("connected to database");
     }
 
-    finally{
+    finally {
 
     }
 }
@@ -59,9 +68,9 @@ async function run() {
 run().catch(console.dir)
 
 client.connect(err => {
-  const collection = client.db("test").collection("devices");
-  // perform actions on the collection object
-  client.close();
+    const collection = client.db("test").collection("devices");
+    // perform actions on the collection object
+    client.close();
 });
 
 
