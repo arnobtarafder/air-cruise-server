@@ -59,14 +59,17 @@ async function run() {
             }
         }
 
-        // PRODUCTS
+
+        //----------PRODUCTS
         app.get("/products", async (req, res) => {
             const products = await productCollection.find({}).toArray();
             res.send(products);
         })
 
-        // USERS        
-        app.get("/users", verifyJWT, async (req, res) => {
+
+
+        //----------USERS        
+        app.get("/users", async (req, res) => {
             const users = await userCollection.find().toArray();
             res.send(users)
         });
@@ -85,13 +88,72 @@ async function run() {
             res.send({ result, token });
         })
 
-        // ADMIN      
+
+        //---------------ADMIN      
         app.get('/admin/:email', async (req, res) => {
             const email = req.params.email;
             const user = await userCollection.findOne({ email: email });
             const isAdmin = user?.role === 'admin';
             res.send({ admin: isAdmin });
         })
+
+        app.put("/users/admin/:email", async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const updateDoc = {
+                $set: { role: "admin" },
+            }
+            const result = await userCollection.updateOne(filter, updateDoc);
+
+            res.send(result);
+        })
+
+
+
+        //-----------ORDERS  
+        app.get("/orders", async (req, res) => {
+            const user = req?.query?.user;
+           const query = {user: user};
+           const orders = await orderCollection.find(query).toArray();
+           res.send(orders)
+
+        })
+
+        app.get("/orders/:id", verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const booking = await orderCollection.findOne(query);
+            res.send(booking)
+        })
+
+        app.post('/orders', async (req, res) => {
+            const booking = req.body;
+            const query = { treatment: booking.treatment, date: booking.date, patient: booking.patient }
+            const exists = await orderCollection.findOne(query);
+            if (exists) {
+                return res.send({ success: false, booking: exists })
+            }
+            const result = await orderCollection.insertOne(booking);
+            return res.send({ success: true, result });
+        })
+
+        app.patch("/orders/:id", verifyJWT, async (req, res) => {
+            const id = req.params.id;
+            const payment = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    paid: true,
+                    transactionId: payment.transactionId
+                }
+            }
+
+            const updatedOrder = await orderCollection.updateOne(filter, updatedDoc)
+            const result = await paymentCollection.insertOne(payment)
+            res.send(result)
+        })
+
+
 
 
 
