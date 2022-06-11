@@ -68,6 +68,13 @@ async function run() {
             res.send(products);
         })
 
+         //----------------PRODUCTS
+         app.post('/products', async (req, res) => {
+            const product = req.body;
+            const result = await productCollection.insertOne(product);
+            res.send(result);
+        })
+
 
 
         //----------USERS        
@@ -185,6 +192,8 @@ async function run() {
             const result = await reviewCollection.insertOne(booking);
             res.send(result);
         })
+        
+       
 
 
 
